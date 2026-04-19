@@ -25,7 +25,7 @@ def load_api_config() -> dict:
                 config = yaml.safe_load(f) or {}
             model_cfg = config.get("model", {})
             api_key = model_cfg.get("api_key") or os.environ.get("MINIMAX_API_KEY")
-            base_url = model_cfg.get("base_url") or "https://api.minimaxi.com/anthropic"
+            base_url = model_cfg.get("base_url") or "https://api.minimaxi.com/anthropic/v1"
             if api_key:
                 return {
                     "api_key": api_key,
@@ -43,7 +43,7 @@ def load_api_config() -> dict:
                 config = yaml.safe_load(f) or {}
             model_cfg = config.get("model", {})
             api_key = model_cfg.get("api_key") or os.environ.get("MINIMAX_API_KEY")
-            base_url = model_cfg.get("base_url") or "https://api.minimaxi.com/anthropic"
+            base_url = model_cfg.get("base_url") or "https://api.minimaxi.com/anthropic/v1"
             if api_key:
                 return {
                     "api_key": api_key,

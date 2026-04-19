@@ -2,7 +2,7 @@
 
 import json
 import re
-from openai import OpenAI
+import anthropic
 
 from readability.models import ReadabilityResult
 from readability.prompts import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
@@ -14,7 +14,7 @@ class ReadabilityAnalyzer:
 
     def __init__(self):
         config = load_api_config()
-        self.client = OpenAI(
+        self.client = anthropic.Anthropic(
             api_key=config["api_key"],
             base_url=config["base_url"],
         )
@@ -38,17 +38,24 @@ class ReadabilityAnalyzer:
 
         for attempt in range(max_retries):
             try:
-                response = self.client.chat.completions.create(
+                response = self.client.messages.create(
                     model=self.model,
+                    system=SYSTEM_PROMPT,
                     messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": user_prompt},
+                        {"role": "user", "content": user_prompt}
                     ],
                     temperature=0.3,
-                    response_format={"type": "json_object"},
+                    max_tokens=4096,
                 )
 
-                content = response.choices[0].message.content
+                # Handle different block types from Anthropic API
+                content = ""
+                for block in response.content:
+                    if block.type == "text":
+                        content = block.text
+                        break
+                if not content:
+                    raise ValueError(f"API返回内容为空或格式异常: {response.content}")
                 data = json.loads(content)
                 return ReadabilityResult(**data)
 
